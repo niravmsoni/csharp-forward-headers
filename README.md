@@ -1,4 +1,4 @@
-# Forward Headers (Remote Client IP/Remote Port retrieval) in .NET Core
+# Forward Headers (Remote Client IP/Remote Port) in .NET Core
 
 Let's go through how we extract Client IP addresses within a .NET Core Web API.
 
