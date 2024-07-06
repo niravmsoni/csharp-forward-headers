@@ -88,13 +88,71 @@ app.MapGet("/get-ip", (IHttpContextAccessor httpContextAccessor) =>
 app.Run();
 ```
 
+## Troubleshooting
+When headers aren't forwarded as expected, enable debug level logging and HTTP request logging
+```csharp
+using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.HttpOverrides;
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRazorPages();
+
+//Enable HTTP Logging
+builder.Services.AddHttpLogging(options =>
+{
+    options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
+});
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    //ForwardOptions Configuration
+});
+
+var app = builder.Build();
+
+app.UseForwardedHeaders();
+// Integrate HTTP Logging Middleware
+app.UseHttpLogging();
+
+app.Use(async (context, next) =>
+{
+    // Connection: RemoteIp
+    app.Logger.LogInformation("Request RemoteIp: {RemoteIpAddress}",
+        context.Connection.RemoteIpAddress);
+
+    await next(context);
+});
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseAuthorization();
+
+app.MapRazorPages();
+
+app.Run();
+```
+Updating `appsettings.json` to enable logging from  `Microsoft.AspnetCore.HttpLogging` namespace at Information level!
+```json
+{
+  "DetailedErrors": true,
+  "Logging": {
+    "LogLevel": {
+      "Microsoft.AspNetCore.HttpLogging": "Information"
+    }
+  }
+}
+```
 ## References
    - [MSFT Learn](https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/proxy-load-balancer?view=aspnetcore-8.0)
    - [ForwardedHeadersOptions](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.builder.forwardedheadersoptions?view=aspnetcore-8.0)
    - [ForwardedHeadersMiddleware](https://learn.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.httpoverrides.forwardedheadersmiddleware?view=aspnetcore-8.0)
-
-If this has helped you in any means, please leave a reaction to this post and if possible ⭐ the GitHub Repository
-
 
 
 ## Give a Star! ⭐
