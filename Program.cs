@@ -11,6 +11,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddHttpContextAccessor();
+//Enable HTTP Logging
+builder.Services.AddHttpLogging(options =>
+{
+    options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders;
+});
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
@@ -35,6 +40,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseForwardedHeaders();
+
+// Integrate HTTP Logging Middleware
+app.UseHttpLogging();
 
 app.UseHttpsRedirection();
 
